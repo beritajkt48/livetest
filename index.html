@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Streaming</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+    <h1>Live Streaming</h1>
+    <video id="video" width="640" height="360" controls></video>
+
+    <script>
+        async function loadStream() {
+            try {
+                const siteID = window.location.pathname.split("/")[1];
+                const response = await fetch(`/${siteID}/stream`);
+                const data = await response.json();
+                const videoSrc = data.streamUrl;
+                var video = document.getElementById("video");
+
+                if (Hls.isSupported()) {
+                    var hls = new Hls();
+                    hls.loadSource(videoSrc);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        video.play();
+                    });
+                } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+                    video.src = videoSrc;
+                    video.addEventListener("loadedmetadata", function() {
+                        video.play();
+                    });
+                }
+            } catch (error) {
+                document.body.innerHTML = "<h1>Silahkan logout dari perangkat lainnya.</h1>";
+            }
+        }
+
+        loadStream();
+    </script>
+</body>
+</html>
